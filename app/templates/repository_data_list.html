@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<h2>Data Repositories</h2>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col" width=15%>#</th>
+            <th scope="col" width=280>Description</th>
+            <th scope="col" width=*>Date</th>
+            <th scope="col" width=150></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for repository in repositories %}
+            <tr>
+                <td scope="row" data-toggle="collapse" data-target="#{{repository.id}}"  class="clickable">
+                    {{ repository.id }}
+                </td>
+                <td scope="row" data-toggle="collapse" data-target="#{{repository.id}}"  class="clickable">
+                    {{ repository.description }}
+                </td>
+                <td scope="row" data-toggle="collapse" data-target="#{{repository.id}}"  class="clickable">
+                    {{ repository.date }}
+                </td>     
+                <td style="text-align: right">
+                    <a href="{{ url_for('repository_data_read', repository_id=repository.id) }}"><img alt="Open" width="25px" src="{{ url_for('navigation_file', crud_id='read') }}"></a>
+                </td>   
+            </tr>
+            <tr id="{{repository.id}}" class="no-border collapse">
+                <td></td>
+                <td colspan="2">
+                    <small>{{ repository.repository }}</small>
+                </td>
+                <td></td>
+              </tr>            
+        {% endfor %}
+    </tbody>    
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td style="text-align: right"><a href="{{ url_for('repository_data_create') }}"><img alt="Add" width="25px" src="{{ url_for('navigation_file', crud_id='create') }}"></a></td>
+        </tr>
+    </tfoot>      
+</table>
+{% endblock %}

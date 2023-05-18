@@ -1,0 +1,10 @@
+
+# Ignore folders
+__pycache__/
+migrations/
+env/
+.vscode/
+
+# Ignore files
+.flaskenv
+

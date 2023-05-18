@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<h2>Tiles</h2>
+
+<div>
+    <hr>
+    <form id="tile_filter" action="" method="POST">
+        <div class="row">
+            <div class="col-3">
+                <input name="input_latitude" id="input_latitude" min="30" max="45" class="form-control" placeholder="latitude" value="{{ latitude }}">
+            </div>
+            <div class="col-3">
+                <input name="input_longitude" id="input_longitude" min="30" max="45" class="form-control" placeholder="longiutde" value="{{ longitude }}">
+            </div>
+            <div onclick="submit_form()" class="btn">Search</div>
+        </div>
+    </form>
+    <script>
+        function submit_form(){
+            var input_latitude = document.getElementsByTagName("input")[0].value;
+            var input_longitude = document.getElementsByTagName("input")[1].value;
+
+            if (input_latitude == 0) {
+                input_latitude = 'empty';
+            } 
+
+            if (input_longitude == 0) {
+                input_longitude = 'empty';
+            } 
+
+            window.location = "{{ url_for('tile_list', latitude='input_latitude', longitude='input_longitude')}}"
+                .replace("input_latitude", input_latitude)
+                .replace("input_longitude", input_longitude)
+        }
+    </script>
+</div>
+
+<br>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col" width=15%>#</th>
+            <th scope="col" width=260>Coordinate</th>
+            <th scope="col" width=*>Coordinate</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for tile in tiles %}
+            <tr>
+                <td scope="row" data-toggle="collapse" data-target="#{{tile.id}}"  class="clickable">
+                    {{ tile.id }}
+                </td>
+                <td scope="row" data-toggle="collapse" data-target="#{{tile.id}}"  class="clickable">
+                    {{ "%.4f"|format(tile.latitude) }}, {{ "%.4f"|format(tile.longitude) }}
+                </td>
+                <td>
+
+                </td>
+            </tr>
+            <tr id="{{tile.id}}" class="no-border collapse">
+                <td></td>
+                <td>
+                    {% if tile.image_filename %}                    
+                    <a href="{{ url_for('bingmaps_coordinate', latitude=tile.latitude, longitude=tile.longitude) }}">
+                        <img src="{{ url_for('tile_image_bing', tile_id=tile.id) }}" style="width: 250px">
+                    </a>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if tile.image_filename %}                    
+                    <img src="{{ url_for('tile_image_corona', tile_id=tile.id) }}" style="width: 250px">
+                    {% endif %}
+                </td>                
+            </tr>            
+        {% endfor %}
+    </tbody>    
+    <tfoot>
+        <tfoot>
+            <tr>
+                <td></td>
+                <td></td>             
+            </tr>
+        </tfoot>           
+    </tfoot>
+</table>
+{% endblock %}

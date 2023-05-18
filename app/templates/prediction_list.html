@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<h2>Predictions</h2>
+
+<div>
+    <hr>
+    <form id="prediction_filter" action="" method="POST">
+        <div class="row">
+            <div class="col-5">
+                <select class="form-control" name="input_prediction_model_id" id="input_prediction_model_id">
+                    {% for prediction_model in prediction_models %}
+                        {% if prediction_model.id == prediction_model_id | string %}
+                        <option value="{{ prediction_model.id }}" selected>{{ prediction_model.description }}</option>
+                        {% else %}
+                        <option value="{{ prediction_model.id }}">{{ prediction_model.description }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>   
+            </div>          
+            <div class="col-2">
+                <input name="input_min_probability" id="input_min_probability" type="number" min="0" max="100" class="form-control" placeholder="min" value="{{ min_probability }}">
+            </div>
+            <div class="col-2">
+                <input name="input_max_probability" id="input_max_probability" type="number"  min="0" max="100" class="form-control" placeholder="max" value="{{ max_probability }}">
+            </div>
+            <div class="col-2">
+                <select class="form-control" name="input_shows_tell" id="input_shows_tell">
+                    {% if shows_tell|int == 0 %}
+                    <option value="0" selected>All</option>
+                    {% else %}
+                    <option value="0">All</option>
+                    {% endif %}       
+                    {% if shows_tell|int == 1 %}                                 
+                    <option value="1" selected>Tell</option>
+                    {% else %}  
+                    <option value="1">Tell</option>
+                    {% endif %}                     
+                    {% if shows_tell|int == 2 %}                    
+                    <option value="2" selected>Other</option>
+                    {% else %}    
+                    <option value="2">Other</option>                    
+                    {% endif %}                     
+                </select>                
+            </div>              
+            <div onclick="submit_form()" class="btn">Search</div>
+        </div>
+    </form>
+    <script>
+        function submit_form(){
+            var input_prediction_model_id = document.getElementsByTagName("select")[0].value;
+            var input_min_probability = document.getElementsByTagName("input")[0].value;
+            var input_max_probability = document.getElementsByTagName("input")[1].value;
+            var input_shows_tell = document.getElementsByTagName("select")[1].value;
+
+            window.location = "{{ url_for('prediction_list', prediction_model_id='input_prediction_model_id', min_probability='input_min_probability', max_probability='input_max_probability', shows_tell='input_shows_tell')}}"
+                .replace("input_prediction_model_id", input_prediction_model_id)
+                .replace("input_min_probability", input_min_probability)
+                .replace("input_max_probability", input_max_probability)
+                .replace("input_shows_tell", input_shows_tell);
+        }
+    </script>
+</div>
+
+<br>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col" width=15%>#</th>
+            <th scope="col" width=280>Coordinate</th>
+            <th scope="col" width=280>Probability</th>
+            <th scope="col" width=*>Site</th>
+            <th scope="col" width=150></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for prediction in predictions %}
+            <tr>
+                <td scope="row" data-toggle="collapse" data-target="#{{prediction.id}}"  class="clickable">
+                    {{ prediction.id }}
+                </td>
+                <td scope="row" data-toggle="collapse" data-target="#{{prediction.id}}"  class="clickable">
+                    {{ "%.4f"|format(prediction.latitude) }}, {{ "%.4f"|format(prediction.longitude) }}
+                </td>
+                <td scope="row" data-toggle="collapse" data-target="#{{prediction.id}}"  class="clickable">
+                    {{ "%.2f"|format(prediction.probability) }}
+                </td>     
+                <td scope="row" data-toggle="collapse" data-target="#{{prediction.id}}"  class="clickable">
+                    {{ prediction.tile.site.sitename }}
+                </td>                     
+                <td style="text-align: right">
+                    <a href="{{ url_for('prediction_read', prediction_id=prediction.id) }}"><img alt="Open" width="25px" src="{{ url_for('navigation_file', crud_id='read') }}"></a>
+                </td>   
+            </tr>
+            <tr id="{{prediction.id}}" class="no-border">
+                <td></td>
+                <td>
+                    {% if prediction.tile_id %}
+                        {% if prediction.prediction_model.repository_data.corona_data == false %}
+                        <a href="{{ url_for('bingmaps_coordinate', latitude=prediction.latitude, longitude=prediction.longitude) }}">
+                            <img src="{{ url_for('tile_image_bing', tile_id=prediction.tile_id) }}" style="width: 256px">
+                        </a>
+                        {% else %} 
+                        <img src="{{ url_for('tile_image_corona', tile_id=prediction.tile_id) }}" style="width: 256px">
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>                    
+                    {% if prediction.filename_heatmap %}
+                    <img src="{{ url_for('prediction_file_heatmap', prediction_id=prediction.id) }}" style="width: 256px">
+                    {% endif %}
+                </td>  
+                <td></td>
+                <td></td>                
+            </tr>            
+        {% endfor %}
+    </tbody>    
+    <tfoot>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>            
+            <td></td>
+            <td style="text-align: right"><a href="{{ url_for('prediction_create') }}"><img alt="Add" width="25px" src="{{ url_for('navigation_file', crud_id='create') }}"></a></td>            
+        </tr>
+    </tfoot>
+</table>
+{% endblock %}

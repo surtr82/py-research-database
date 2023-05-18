@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+  <script src="https://d3js.org/d3.v4.js"></script>
+
+  <div class="bs-example">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+          <a href="#general" class="nav-link active" data-toggle="tab">General</a>
+      </li>
+      <li class="nav-item">
+        <a href="#code" class="nav-link" data-toggle="tab">Code</a>
+      </li>
+      <li class="nav-item">
+          <a href="#data" class="nav-link" data-toggle="tab">Data</a>
+      </li>
+      <li class="nav-item">
+        <a href="#training" class="nav-link" data-toggle="tab">Training</a>
+      </li>    
+      <li class="nav-item">
+        <a href="#predictions" class="nav-link" data-toggle="tab">Predictions</a>
+      </li>          
+      <li class="nav-item">
+        <a href="#rating" class="nav-link" data-toggle="tab">Rating</a>
+      </li>           
+    </ul>
+
+    <div class="tab-content">
+
+      <div class="tab-pane fade show active" id="general">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td width="250px">#</td>
+                        <td width="*">{{ prediction_model.id }} </td>
+                      </tr>                  
+                      <tr>
+                        <td>Description</td>
+                        <td>{{ prediction_model.description }}</td>
+                      </tr>
+                      <tr>
+                        <td>Date</td>
+                        <td>{{ prediction_model.date }}</td>
+                      </tr>
+                      <tr>
+                        <td>Code Repository</td>
+                        <td>{{ prediction_model.repository_code.description }}</td>
+                      </tr>
+                      <tr>
+                        <td>Data Repository</td>
+                        <td>{{ prediction_model.repository_data.description }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>                               
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="code">
+        <div style="margin-top:50px; margin-bottom:50px;">
+            <script src="{{ prediction_model.repository_code.gist }}"></script>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="data">
+        <div style="margin-top:50px; margin-bottom:50px;">
+            train\tell: {{ prediction_model.repository_data.no_images_train_tell }} <br>
+            train\other: {{ prediction_model.repository_data.no_images_train_other }} <br>
+            validate\tell: {{ prediction_model.repository_data.no_images_validate_tell }} <br>
+            validate\other: {{ prediction_model.repository_data.no_images_validate_other }} <br>
+            test\tell: {{ prediction_model.repository_data.no_images_test_tell }} <br>
+            test\other: {{ prediction_model.repository_data.no_images_test_other }} <br>
+            predict\map: {{ prediction_model.repository_data.no_images_predict_map }} <br>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="training">
+        <div style="margin-top:50px; margin-bottom:50px;">
+            <table width=100% class="table">
+                <tbody>
+                    <tr class="no-border">
+                        <td colspan="1">
+                            {% if prediction_model.filename_validate_loss %}
+                            <embed width=400 height=300 type="application/pdf" src="{{ url_for('prediction_model_file_validate_loss', prediction_model_id=prediction_model.id) }}#zoom=60&toolbar=0"></embed>                                      
+                            <br>
+                            <a href="{{ url_for('prediction_model_file_validate_loss', prediction_model_id=prediction_model.id) }}" target="_blank">
+                                Zoom
+                            </a>                                
+                            {% endif %}
+                        </td>
+                        <td colspan="1">
+                            {% if prediction_model.filename_validate_acc %}
+                            <embed width=400 height=300 type="application/pdf" src="{{ url_for('prediction_model_file_validate_acc', prediction_model_id=prediction_model.id) }}#zoom=60&toolbar=0"></embed>                     
+                            <br>
+                            <a href="{{ url_for('prediction_model_file_validate_acc', prediction_model_id=prediction_model.id) }}" target="_blank">
+                                Zoom
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr class="no-border">                                
+                        <td colspan="1">
+                            {% if prediction_model.filename_test_hist %}
+                            <embed width=400 height=300 type="application/pdf" src="{{ url_for('prediction_model_file_test_hist', prediction_model_id=prediction_model.id) }}#zoom=60&toolbar=0"></embed>    
+                            <br>
+                            <a href="{{ url_for('prediction_model_file_test_hist', prediction_model_id=prediction_model.id) }}" target="_blank">
+                                Zoom
+                            </a>                                  
+                            {% endif %}                     
+                        </td>
+                        <td colspan="1">
+                            {% if prediction_model.filename_predict_hist %}
+                            <embed width=400 height=300 type="application/pdf" src="{{ url_for('prediction_model_file_predict_hist', prediction_model_id=prediction_model.id) }}#zoom=60&toolbar=0"></embed>    
+                            <br>
+                            <a href="{{ url_for('prediction_model_file_predict_hist', prediction_model_id=prediction_model.id) }}" target="_blank">
+                                Zoom
+                            </a>                                  
+                            {% endif %}   
+                        </td>
+                    </tr>
+                </tbody>
+            </table>              
+        </div>
+      </div>
+      
+      <div class="tab-pane fade" id="predictions">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <div id="histogram"></div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="rating">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table width=100%>
+            <thead>
+              <tr>
+                <td><b>Measure</b></td>
+                <td><b>Tell</b></td>
+                <td><b>Tile</b></td>
+              </tr>
+            </thead>
+            <tbody>
+                <tr>
+                  <td>          
+                    Sensivity
+                  </td>
+                  <td> 
+                    {{ "%.2f"|format(site_sensivity) }}%
+                  </td>
+                  <td>          
+                    {{ "%.2f"|format(tile_sensivity) }}%
+                  </td>                  
+                </tr>  
+                <tr>
+                  <td>          
+                    False Negative Rate
+                  </td>
+                  <td>          
+                    {{ "%.2f"|format(site_false_negative_rate) }}%
+                  </td>
+                  <td>          
+                    {{ "%.2f"|format(tile_false_negative_rate) }}%
+                  </td>                  
+                </tr>                  
+                <tr>
+                  <td>          
+                    Specificity
+                  </td>
+                  <td>          
+                    -
+                  </td>
+                  <td>          
+                    {{ "%.2f"|format(tile_specificity) }}%
+                  </td>                  
+                </tr>  
+                <tr>
+                  <td>          
+                    False Positive Rate
+                  </td>
+                  <td>          
+                    -
+                  </td>
+                  <td>          
+                    {{ "%.2f"|format(tile_false_positive_rate) }}%
+                  </td>                  
+                </tr>  
+              </tbody>
+          </table>                
+        </div>
+      </div>
+  </div>
+      
+  <hr>
+
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="50%"><a href="{{ url_for('prediction_model_update', prediction_model_id=prediction_model.id) }}"><img alt="Add" width="25px" src="{{ url_for('navigation_file', crud_id='update') }}"></a></td>
+
+        <td width="50%" style="text-align: right">
+          <form method="post" action="{{ url_for('prediction_model_delete', prediction_model_id=prediction_model.id) }}">
+            <input type="image" width="25px" src="{{ url_for('navigation_file', crud_id='delete') }}" alt="submit" />
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+  <script>
+    // set the dimensions and margins of the graph
+    var margin = {top: 10, right: 30, bottom: 30, left: 60},
+      width = 800 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#histogram")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+      // X axis: scale and draw:
+      var x = d3.scaleLinear()
+        .domain([0, 100])     
+        .range([0, width]);
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+      // set the parameters for the histogram
+      var histogram = d3.histogram()
+        .value(function(d) { return d.probability; })   // I need to give the vector of value
+        .domain(x.domain())       // then the domain of the graphic
+        .thresholds(x.ticks(10)); // then the numbers of bins
+
+      // And apply this function to data to get the bins
+      var data = JSON.parse('{{ prediction_list | tojson | safe }}');
+      var bins = histogram(data);
+
+      // Y axis: scale and draw:
+      var y = d3.scaleLinear()
+        .range([height, 0]);
+        y.domain([0, d3.max(bins, function(d) { return d.length; })]);   // d3.hist has to be called before the Y axis obviously
+      svg.append("g")
+        .call(d3.axisLeft(y));
+
+      // append the bar rectangles to the svg element
+      svg.selectAll("rect")
+        .data(bins)
+        .enter()
+        .append("rect")
+        .attr("x", 1)
+        .attr("transform", function(d) { return "translate(" + x(d.x0) + "," + y(d.length) + ")"; })
+        .attr("width", function(d) { return x(d.x1) - x(d.x0) -1 ; })
+        .attr("height", function(d) { return height - y(d.length); })
+        .on("mouseover", handleMouseOver)
+        .on("mouseout", handleMouseOut)
+        .on("click", handleClick)
+        .style("fill", "#b8b8b8")
+
+      function handleMouseOver(d) {
+        // Use D3 to select element, change color
+        d3.select(this).style("opacity", 0.8);
+      };
+      
+      function handleMouseOut(d) {
+        // Use D3 to select element, change color
+        d3.select(this).style("opacity", 1);
+      };	
+
+      function handleClick(d) {
+        // Redirect to data view
+        window.location = "{{ url_for('prediction_list', prediction_model_id='input_prediction_model_id', min_probability='input_min_probability', max_probability='input_max_probability', shows_tell='input_shows_tell')}}"
+                  .replace("input_prediction_model_id", '{{ prediction_model.id }}')
+                  .replace("input_min_probability", d.x0)
+                  .replace("input_max_probability", d.x1)
+                  .replace("input_shows_tell", 0);
+      };
+  </script>
+{% endblock %}

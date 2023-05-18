@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+  <div class="bs-example">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a href="#general" class="nav-link active" data-toggle="tab">General</a>
+      </li>
+      <li class="nav-item">
+        <a href="#data" class="nav-link" data-toggle="tab">Data</a>
+      </li>
+      <li class="nav-item">
+        <a href="#models" class="nav-link" data-toggle="tab">Models</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="general">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              <tr>
+                <td width="*">
+                  <table>
+                    <tbody>
+                        <tr>
+                          <td width="260">#</td>
+                          <td width="*">{{ repository.id }}</td>
+                        </tr>
+                        <tr>
+                          <td>Description</td>
+                          <td>{{ repository.description }}</td>
+                        </tr>
+                        <tr>
+                          <td>Date</td>
+                          <td>{{ repository.date }}</td>
+                        </tr>                        
+                        <tr>
+                          <td>Repository</td>
+                          <td>{{ repository.repository }}</td>
+                        </tr>                                                
+                        <tr>
+                          <td>Branch</td>
+                          <td>{{ repository.branch }}</td>
+                        </tr>                                
+                        <tr>
+                          <td>Commit</td>
+                          <td>{{ repository.commit }}</td>
+                        </tr>                            
+                    </tbody>
+                  </table>
+                </td>
+              </tr>                               
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="data">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              <tr>
+                <td width="*">
+                    train\tell: {{ repository.no_images_train_tell }} <br>
+                    train\other: {{ repository.no_images_train_other }} <br>
+                    validate\tell: {{ repository.no_images_validate_tell }} <br>
+                    validate\other: {{ repository.no_images_validate_other }} <br>
+                    test\tell: {{ repository.no_images_test_tell }} <br>
+                    test\other: {{ repository.no_images_test_other }} <br>
+                    predict\map: {{ repository.no_images_predict_map }} <br>
+                </td>
+              </tr>                               
+            </tbody>
+          </table>
+        </div>
+      </div>      
+
+      <div class="tab-pane fade" id="models">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              {% for prediction_model in repository.prediction_models %}
+              <tr>
+                <td width="*">
+                  {{ prediction_model.description }}
+                </td>
+              </tr>      
+              {% endfor %}                         
+            </tbody>
+          </table>
+        </div>
+      </div>      
+  </div>
+
+  <hr>
+
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="50%"><a href="{{ url_for('repository_data_update', repository_id=repository.id) }}"><img alt="Add" width="25px" src="{{ url_for('navigation_file', crud_id='update') }}"></a></td>
+
+        <td width="50%" style="text-align: right">
+          <form method="post" action="{{ url_for('repository_data_delete', repository_id=repository.id) }}">
+            <input type="image" width="25px" src="{{ url_for('navigation_file', crud_id='delete') }}" alt="submit" />
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

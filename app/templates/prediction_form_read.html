@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+
+{% block app_content %}
+  <div class="bs-example">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+          <a href="#general" class="nav-link active" data-toggle="tab">General</a>
+      </li>
+      <li class="nav-item">
+        <a href="#model" class="nav-link" data-toggle="tab">Model</a>          
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="general">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              <tr>
+                <td width=* height=280>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td width="250px">Id</td>
+                        <td width="250px">{{ prediction.id }} </td>
+                      </tr>                  
+                      <tr>
+                        <td>Coordinate</td>
+                        <td>{{ "%.4f"|format(prediction.tile.latitude) }}, {{ "%.4f"|format(prediction.tile.longitude) }}</td>
+                      </tr>
+                      <tr>
+                        <td>Probability</td>
+                        <td>{{ "%.2f"|format(prediction.probability) }}</td>
+                      </tr>
+                      {% if prediction.tile.site.location %}
+                      <tr>
+                        <td>Site</td>
+                        <td>{{ prediction.tile.site.location }}</td>
+                      </tr>   
+                      {% endif %}                   
+                    </tbody>
+                  </table>
+                </td>
+                <td width=260 height=260>
+                    {% if prediction.tile_id %}
+                    <a href="{{ url_for('bingmaps_coordinate', latitude=prediction.latitude, longitude=prediction.longitude) }}">
+                        <img src="{{ url_for('tile_image_bing', tile_id=prediction.tile_id) }}" style="width: 256px">
+                    </a>
+                    {% endif %}
+                </td>
+                <td width=260 height=260>
+                    {% if prediction.filename_heatmap %}
+                    <img src="{{ url_for('prediction_file_heatmap', prediction_id=prediction.id) }}" style="width: 256px">
+                    {% endif %}
+                </td>  
+              </tr>                               
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="model">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+                <tr>
+                  <td width=* height=280>
+                    <table>
+                      <tbody>
+                        <tr>
+                          <td width="250px">Model</td>
+                          <td width="*">{{ prediction.prediction_model.description }}</td>
+                        </tr>
+                        <tr>
+                          <td>Date</td>
+                          <td>{{ prediction.prediction_model.date }}</td>
+                        </tr>                      
+                      </tbody>
+                    </table>
+                  </td>
+            </tbody>
+          </table>            
+        </div>
+      </div>
+  </div>
+      
+  <hr>
+
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="50%"><a href="{{ url_for('prediction_update', prediction_id=prediction.id) }}"><img alt="Add" width="25px" src="{{ url_for('navigation_file', crud_id='update') }}"></a></td>
+
+        <td width="50%" style="text-align: right">
+          <!-- <form method="post" action="{{ url_for('prediction_delete', prediction_id=prediction.id) }}">
+            <input type="image" width="25px" src="{{ url_for('navigation_file', crud_id='delete') }}" alt="submit" />
+          </form> -->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

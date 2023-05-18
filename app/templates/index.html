@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block app_content %}
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+
+<div id="map" ></div>
+
+<style>
+    .circle:hover{
+      stroke: black;
+      stroke-width: 4px;
+    }
+</style>
+
+<script>
+    // Size
+    var width = 1000
+    var height = 800
+    
+    // The svg
+    var svg = d3.select("#map")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+
+    // Map and projection
+    var projection = d3.geoMercator()
+        .center([35.5, 39])                  // GPS of location to zoom on
+        .scale(2720)                         // This is like the zoom
+        .translate([ width/2, height/2 ])
+    
+    // Create data for circles:
+    var markers = JSON.parse('{{ site_json | tojson | safe }}');
+    
+    // Load external data and boot
+    d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson", function(data){
+    
+        // Filter data
+        data.features = data.features.filter( function(d){return d.properties.name=="Turkey"} )
+    
+        // Draw the map
+        svg.append("g")
+            .selectAll("path")
+            .data(data.features)
+            .enter()
+            .append("path")
+              .attr("fill", "#b8b8b8")
+              .attr("d", d3.geoPath()
+                  .projection(projection)
+              )
+            .style("stroke", "black")
+            .style("opacity", .3)
+    
+        // create a tooltip
+        var Tooltip = d3.select("#map")
+          .append("div")
+          .attr("class", "tooltip")
+          .style("opacity", 0)
+          .style("background-color", "white")
+          .style("border", "solid")
+          .style("border-width", "2px")
+          .style("border-radius", "5px")
+          .style("padding", "5px")
+    
+        // Three function that change the tooltip when user hover / move / leave a cell
+        var mouseover = function(d) {
+          Tooltip.style("opacity", 1)
+        }
+
+        var mousemove = function(d) {
+          Tooltip
+            .html(d.name + "<br>" + "long: " + d.long + "<br>" + "lat: " + d.lat)
+            .style("left", "200px")
+            .style("top", "200px")
+        }
+
+        var mouseleave = function(d) {
+          Tooltip.style("opacity", 0)
+        }
+    
+        // Add circles:
+        svg
+          .selectAll("myCircles")
+          .data(markers)
+          .enter()
+          .append("circle")
+            .attr("cx", function(d){ return projection([d.long, d.lat])[0] })
+            .attr("cy", function(d){ return projection([d.long, d.lat])[1] })
+            .attr("r", 1)
+            .attr("class", "circle")
+            .style("fill", "#EA2756")
+            .attr("fill-opacity", .8)
+          .on("mouseover", mouseover)
+          .on("mousemove", mousemove)
+          .on("mouseleave", mouseleave)
+    
+    })
+    
+</script>
+{% endblock %}
+

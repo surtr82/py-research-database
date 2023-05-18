@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+  <div class="bs-example">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+          <a href="#general" class="nav-link active" data-toggle="tab">General</a>
+      </li>
+      <li class="nav-item">
+        <a href="#tiles" class="nav-link" data-toggle="tab">Tiles</a>
+      </li>
+      <li class="nav-item">
+          <a href="#predictions" class="nav-link" data-toggle="tab">Predictions</a>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+
+      <div class="tab-pane fade show active" id="general">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              <tr>
+                <td width=* height=280>
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td width="250px">No.</td>
+                        <td width="250px">{{ site.publication_no }} </td>
+                      </tr>                  
+                      <tr>
+                        <td>Name</td>
+                        <td>{{ site.sitename }}</td>
+                      </tr>
+                      <tr>
+                        <td>Location</td>
+                        <td>{{ site.location }}</td>
+                      </tr>
+                      <tr>
+                        <td>Province</td>
+                        <td>{{ site.province }}</td>
+                      </tr>       
+                      <tr>
+                        <td>District</td>
+                        <td>{{ site.district }}</td>
+                      </tr>      
+                      <tr>
+                        <td>Coordinate</td>
+                        <td>{{ "%.4f"|format(site.latitude) }}, {{ "%.4f"|format(site.longitude) }}</td>
+                      </tr>
+                      <tr>
+                        <td>Shape</td>
+                        <td>{{ site.shape.description }}</td>
+                      </tr>         
+                      <tr>
+                        <td>Est. Tell Diameter</td>
+                        <td>{{ site.est_tell_diameter }}</td>
+                      </tr>
+                      <tr>
+                        <td>Est. Lower Town Diameter</td>
+                        <td>{{ site.est_lowertown_diameter }}</td>
+                      </tr>                      
+                      <tr>
+                        <td>Est. Tell Height</td>
+                        <td>{{ site.est_tell_height }}</td>
+                      </tr>   
+                      <tr>
+                        <td>Condition 1969</td>
+                        <td>△ {% if site.corona_tell_condition %}{{ "%.0f"|format(site.corona_tell_condition) }}{% else %} n.a.{% endif %} / ▽ {% if site.corona_lowertown_condition %}{{ "%.0f"|format(site.corona_lowertown_condition) }}{% else %}n.a.{% endif %}</td>
+                      </tr>                       
+                      <tr>
+                        <td>Condition 2022</td>
+                        <td>△ {% if site.bing_tell_condition %}{{ "%.0f"|format(site.bing_tell_condition) }}{% else %} n.a.{% endif %} / ▽ {% if site.bing_lowertown_condition %}{{ "%.0f"|format(site.bing_lowertown_condition) }}{% else %}n.a.{% endif %}</td>
+                      </tr>                                             
+                      <tr>
+                        <td>Looted</td>
+                        <td>{{ site.looted }}</td>
+                      </tr>                         
+                      <tr>
+                        <td>Bibliopgraphy</td>
+                        <td>{{ site.bibliography }}</td>
+                      </tr>                       
+                      {% if site.tay_project %}
+                      <tr>
+                        <td>TAY-Project</td>
+                        <td><a href="{{ site.tay_project }}">link</a></td>
+                      </tr>     
+                      {% endif %} 
+                      <tr>
+                        <td>Dating</td>
+                        <td>{{ site.dating }}</td>
+                      </tr>   
+                    </tbody>                    
+                  </table>
+                </td>
+                <td width=260 height=260>
+                  {% if site.filename_bing_image %}
+                  <a href="{{ url_for('bingmaps_coordinate', latitude=site.latitude, longitude=site.longitude) }}">
+                      <img src="{{ url_for('site_image_bing', site_id=site.id) }}" style="width: 250px">
+                  </a>
+                  {% endif %}
+                </td>
+                <td width=260 height=260>
+                  {% if site.filename_corona_image %}
+                  <img src="{{ url_for('site_image_corona', site_id=site.id) }}" style="width: 250px">
+                  {% endif %}
+                </td>    
+              </tr>                               
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="tiles">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table width=100%>
+            <tbody>
+              {% for tile in site.tiles %}
+                <tr>
+                    <td width=260 height=260>
+                        {% if tile.image_filename %}
+                        <a href="{{ url_for('bingmaps_coordinate', latitude=tile.latitude, longitude=tile.longitude) }}">
+                            <img src="{{ url_for('tile_image_bing', tile_id=tile.id) }}" style="width: 250px">
+                        </a>
+                        {% endif %}
+                    </td>
+                    <td width=260 height=260>
+                      {% if tile.image_filename %}
+                      <img src="{{ url_for('tile_image_corona', tile_id=tile.id) }}" style="width: 250px">
+                      {% endif %}                      
+                    </td>
+                    <td width=* height=260>
+                      {{ tile.latitude }}, {{ tile.longitude }} <br>
+                    </td>           
+                    <td width=260 height=260 style="text-align: right">
+                      <form method="post" action="{{ url_for('site_tile_delete', site_id=site.id, tile_id=tile.id) }}">
+                        <input type="image" width="25px" src="{{ url_for('navigation_file', crud_id='delete') }}" alt="submit" />
+                      </form>                      
+                    </td>          
+                </tr>                               
+              {% endfor %}
+            </tbody>
+          </table>            
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="predictions">
+        <div style="margin-top:50px; margin-bottom:50px;">
+          <table>
+            <tbody>
+              {% for tile in site.tiles %}
+                {% for prediction in tile.predictions %}
+                  {% if prediction.probability >= 50 %}     
+                  <tr>
+                      <td width=260 height=260>
+                        {% if tile.image_filename %}                          
+                          {% if prediction.prediction_model.repository_data.corona_data == False %}
+                          <a href="{{ url_for('bingmaps_coordinate', latitude=tile.latitude, longitude=tile.longitude) }}">
+                              <img src="{{ url_for('tile_image_bing', tile_id=tile.id) }}" style="width: 250px">
+                          </a>
+                          {% else %}
+                          <img src="{{ url_for('tile_image_corona', tile_id=tile.id) }}" style="width: 250px">
+                          {% endif %}  
+                        {% endif %}
+                      </td>
+                      <td width=260 height=260>
+                        {% if prediction.filename_heatmap %}
+                          <img src="{{ url_for('prediction_file_heatmap', prediction_id=prediction.id) }}" style="width: 250px">
+                        {% endif %}
+                      </td>      
+                      <td width=* height=260>
+                        <table>
+                          <tbody>
+                            <tr>
+                              <td width=140>
+                                Model
+                              </td>
+                              <td>
+                                {{ prediction.prediction_model.description }} 
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                Probability
+                              </td>
+                              <td>
+                                {{ prediction.probability }} 
+                              </td>
+                            </tr>                          
+                          </tbody>
+                        </table>
+                      </td>                                              
+                  </tr>      
+                  {% endif %}  
+                {% endfor %}                  
+              {% endfor %}
+            </tbody>
+          </table>            
+        </div>
+      </div>
+  </div>
+      
+  <hr>
+
+  <table width="100%">
+    <tbody>
+      <tr>
+        <td width="50%"><a href="{{ url_for('site_update', site_id=site.id) }}"><img alt="Add" width="25px" src="{{ url_for('navigation_file', crud_id='update') }}"></a></td>
+
+        <td width="50%" style="text-align: right">
+          <form method="post" action="{{ url_for('site_delete', site_id=site.id) }}">
+            <input type="image" width="25px" src="{{ url_for('navigation_file', crud_id='delete') }}" alt="submit" />
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endblock %}

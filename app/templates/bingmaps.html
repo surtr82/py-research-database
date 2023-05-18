@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bing Maps</title>
+        <meta charset="utf-8" />
+        <script type='text/javascript'
+                src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=AgdmS6YNF3y5xpaJLuBVm1l4xofAq9RN7mJjui4bkfsiMhFt5JQX7nMb3PZe91Hs' 
+                async defer></script>
+        
+        <script type='text/javascript'>
+            function GetMap()
+            {
+                var latitude = '{{latitude}}';
+                var longitude = '{{longitude}}';
+                var map = new Microsoft.Maps.Map('#myMap', {
+                    credentials: 'AgdmS6YNF3y5xpaJLuBVm1l4xofAq9RN7mJjui4bkfsiMhFt5JQX7nMb3PZe91Hs',
+                    center: new Microsoft.Maps.Location(latitude, longitude),
+                    mapTypeId: Microsoft.Maps.MapTypeId.aerial,
+                    zoom: 16
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <div id="myMap" style="position:relative;width:100%;height:100%;"></div>
+    </body>
+</html>
