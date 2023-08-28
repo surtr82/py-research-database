@@ -1,6 +1,6 @@
 from app import app, db
 from app.email import send_password_reset_email
-from app.forms import UserLogin, UserRegistration, UserUpdate, UserResetPasswordRequest, UserResetPassword, LiteratureForm, PredictionForm, PredictionModelForm, RepositoryCodeForm, RepositoryDataForm, SiteForm, TileForm
+from app.forms import UserLogin, UserRegistration, UserUpdate, UserResetPasswordRequest, UserResetPassword, PredictionForm, PredictionModelForm, RepositoryCodeForm, RepositoryDataForm, SiteForm, TileForm
 from app.models import User, Tile, Shape, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction
 from flask import render_template, abort, flash, redirect, url_for, request, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
@@ -987,6 +987,7 @@ def site_create():
         site.bing_tell_condition = form.bing_tell_condition.data
         site.bing_lowertown_condition = form.bing_lowertown_condition.data            
         site.dating = form.dating.data
+        site.registered = form.registered.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
                 
@@ -1058,6 +1059,7 @@ def site_update(site_id):
         site.bing_tell_condition = form.bing_tell_condition.data
         site.bing_lowertown_condition = form.bing_lowertown_condition.data        
         site.dating = form.dating.data
+        site.registered = form.registered.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
 
@@ -1098,6 +1100,7 @@ def site_update(site_id):
         form.bing_tell_condition.data  = site.bing_tell_condition
         form.bing_lowertown_condition.data = site.bing_lowertown_condition        
         form.dating.data = site.dating
+        form.registered.data = site.registered
         form.tay_project.data = site.tay_project
         form.bibliography.data = site.bibliography
         
