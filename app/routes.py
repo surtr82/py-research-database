@@ -342,12 +342,12 @@ def prediction_model_read(prediction_model_id):
     if (prediction_model.repository_data.corona_data == True):
         count_possible_tiles = (Tile.query
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_tell_condition > 0)
+                                    .filter(Site.corona_rate_site == True)
                                     .count())
         count_right_positive_tiles = (Prediction.query
                                     .join(Tile, Prediction.tile_id == Tile.id)
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_tell_condition > 0)
+                                    .filter(Site.corona_rate_site == True)
                                     .filter(Prediction.prediction_model_id == prediction_model_id)
                                     .filter(Prediction.probability.between(50, 100))
                                     .count())
@@ -357,7 +357,7 @@ def prediction_model_read(prediction_model_id):
         count_right_negative_sites = (Prediction.query
                                     .join(Tile, Prediction.tile_id == Tile.id)
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_tell_condition == 0)
+                                    .filter(Site.corona_rate_site == False)
                                     .filter(Prediction.prediction_model_id == prediction_model_id)
                                     .filter(Prediction.probability.between(0, 49.99))
                                     .count())
@@ -373,7 +373,7 @@ def prediction_model_read(prediction_model_id):
         count_false_positive_sites = (Prediction.query
                                     .join(Tile, Prediction.tile_id == Tile.id)
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_tell_condition == 0)
+                                    .filter(Site.corona_rate_site == False)
                                     .filter(Prediction.prediction_model_id == prediction_model_id)
                                     .filter(Prediction.probability.between(50, 100))
                                     .count())
@@ -389,12 +389,12 @@ def prediction_model_read(prediction_model_id):
     else:
         count_possible_tiles = (Tile.query
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_tell_condition > 0)
+                                    .filter(Site.bing_rate_site == True)
                                     .count())
         count_right_positive_tiles = (Prediction.query
                                     .join(Tile, Prediction.tile_id == Tile.id)
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_tell_condition > 0)
+                                    .filter(Site.bing_rate_site == True)
                                     .filter(Prediction.prediction_model_id == prediction_model_id)
                                     .filter(Prediction.probability.between(50, 100))
                                     .count())
@@ -404,7 +404,7 @@ def prediction_model_read(prediction_model_id):
         count_right_negative_sites = (Prediction.query
                                     .join(Tile, Prediction.tile_id == Tile.id)
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_tell_condition == 0)
+                                    .filter(Site.bing_rate_site == False)
                                     .filter(Prediction.prediction_model_id == prediction_model_id)
                                     .filter(Prediction.probability.between(0, 49.99))
                                     .count())
@@ -420,7 +420,7 @@ def prediction_model_read(prediction_model_id):
         count_false_positive_sites = (Prediction.query
                                     .join(Tile, Prediction.tile_id == Tile.id)
                                     .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_tell_condition == 0)
+                                    .filter(Site.bing_rate_site == False)
                                     .filter(Prediction.prediction_model_id == prediction_model_id)
                                     .filter(Prediction.probability.between(50, 100))
                                     .count())
@@ -450,26 +450,26 @@ def prediction_model_read(prediction_model_id):
    
     if (prediction_model.repository_data.corona_data == True):
         count_all_sites = (Site.query
-                                .filter(Site.bing_tell_condition > 0)
+                                .filter(Site.corona_rate_site == True)
                                 .count())
 
         count_right_positive_sites = (db.session.query(Site.id).distinct()
                                 .join(Tile, Site.id == Tile.site_id)
                                 .join(Prediction, Tile.id == Prediction.tile_id)                                
-                                .filter(Site.bing_tell_condition > 0)
+                                .filter(Site.corona_rate_site == True)
                                 .filter(Prediction.prediction_model_id == prediction_model_id)
                                 .filter(Prediction.probability.between(50, 100))
                                 .group_by(Site.id)
                                 .count())
     else:
         count_all_sites = (Site.query
-                                .filter(Site.bing_tell_condition > 0)
+                                .filter(Site.bing_rate_site == True)
                                 .count())
 
         count_right_positive_sites = (db.session.query(Site.id).distinct()
                                 .join(Tile, Site.id == Tile.site_id)
                                 .join(Prediction, Tile.id == Prediction.tile_id)                                
-                                .filter(Site.bing_tell_condition > 0)
+                                .filter(Site.bing_rate_site == True)
                                 .filter(Prediction.prediction_model_id == prediction_model_id)
                                 .filter(Prediction.probability.between(50, 100))
                                 .group_by(Site.id)
@@ -977,15 +977,21 @@ def site_create():
         site.district = form.district.data
         site.latitude = form.latitude.data 
         site.longitude = form.longitude.data 
+        site.coordinates_confirmed = form.coordinates_confirmed.data
+        site.coordinates_outside_research_area = form.coordinates_outside_research_area.data
         site.shape_id = form.shape_id.data        
         site.looted = form.looted.data
         site.est_tell_diameter = form.est_tell_diameter.data
         site.est_lowertown_diameter = form.est_lowertown_diameter.data
         site.est_tell_height = form.est_tell_height.data
-        site.corona_tell_condition = form.corona_tell_condition.data
-        site.corona_lowertown_condition = form.corona_lowertown_condition.data
-        site.bing_tell_condition = form.bing_tell_condition.data
-        site.bing_lowertown_condition = form.bing_lowertown_condition.data            
+        site.bing_is_overbuilt = form.bing_is_overbuilt
+        site.bing_is_destroyed = form.bing_is_destroyed
+        site.bing_has_quality_issue = form.bing_has_quality_issue        
+        site.bing_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.bing_is_overbuilt == False) and (site.bing_is_destroyed == False) and (site.bing_has_quality_issue == False))
+        site.corona_is_overbuilt = form.corona_is_overbuilt
+        site.corona_is_destroyed = form.corona_is_destroyed
+        site.corona_has_quality_issue = form.corona_has_quality_issue
+        site.corona_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.corona_is_overbuilt == False) and (site.corona_is_destroyed == False) and (site.corona_has_quality_issue == False))
         site.dating = form.dating.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
@@ -1048,15 +1054,21 @@ def site_update(site_id):
         site.district = form.district.data
         site.latitude = form.latitude.data 
         site.longitude = form.longitude.data 
+        site.coordinates_confirmed = form.coordinates_confirmed.data
+        site.coordinates_outside_research_area = form.coordinates_outside_research_area.data
         site.shape_id = form.shape_id.data        
         site.looted = form.looted.data
         site.est_tell_diameter = form.est_tell_diameter.data
         site.est_lowertown_diameter = form.est_lowertown_diameter.data
         site.est_tell_height = form.est_tell_height.data
-        site.corona_tell_condition = form.corona_tell_condition.data
-        site.corona_lowertown_condition = form.corona_lowertown_condition.data
-        site.bing_tell_condition = form.bing_tell_condition.data
-        site.bing_lowertown_condition = form.bing_lowertown_condition.data        
+        site.bing_is_overbuilt = form.bing_is_overbuilt
+        site.bing_is_destroyed = form.bing_is_destroyed
+        site.bing_has_quality_issue = form.bing_has_quality_issue        
+        site.bing_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.bing_is_overbuilt == False) and (site.bing_is_destroyed == False) and (site.bing_has_quality_issue == False))
+        site.corona_is_overbuilt = form.corona_is_overbuilt
+        site.corona_is_destroyed = form.corona_is_destroyed
+        site.corona_has_quality_issue = form.corona_has_quality_issue
+        site.corona_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.corona_is_overbuilt == False) and (site.corona_is_destroyed == False) and (site.corona_has_quality_issue == False))
         site.dating = form.dating.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
@@ -1088,15 +1100,19 @@ def site_update(site_id):
         form.district.data = site.district
         form.latitude.data = site.latitude
         form.longitude.data = site.longitude
+        form.coordinates_confirmed.data = site.coordinates_confirmed
+        form.coordinates_outside_research_area.data = site.coordinates_outside_research_area
         form.shape_id.data = site.shape_id
         form.looted.data = site.looted
         form.est_tell_diameter.data = site.est_tell_diameter
         form.est_lowertown_diameter.data = site.est_lowertown_diameter
         form.est_tell_height.data = site.est_tell_height
-        form.corona_tell_condition.data  = site.corona_tell_condition
-        form.corona_lowertown_condition.data = site.corona_lowertown_condition
-        form.bing_tell_condition.data  = site.bing_tell_condition
-        form.bing_lowertown_condition.data = site.bing_lowertown_condition        
+        form.bing_is_overbuilt = site.bing_is_overbuilt
+        form.bing_is_destroyed = site.bing_is_destroyed
+        form.bing_has_quality_issue = site.bing_has_quality_issue        
+        form.corona_is_overbuilt = site.corona_is_overbuilt
+        form.corona_is_destroyed = site.corona_is_destroyed 
+        form.corona_has_quality_issue = site.corona_has_quality_issue
         form.dating.data = site.dating
         form.tay_project.data = site.tay_project
         form.bibliography.data = site.bibliography
