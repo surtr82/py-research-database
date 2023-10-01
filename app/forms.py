@@ -67,17 +67,6 @@ class UserResetPassword(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
 
-class LiteratureForm(FlaskForm):
-    site_id = SelectField('Site', coerce=int, validators=[DataRequired()])    
-    author = StringField('Author', validators=[DataRequired()])
-    year = IntegerField('Year')
-    title = StringField('Title', validators=[DataRequired()])
-    citation = StringField('Citation', validators=[DataRequired()])
-    url = StringField('URL')
-
-    submit = SubmitField('Save')
-
-
 class PredictionForm(FlaskForm):
     prediction_model_id = SelectField('Model', coerce=int, validators=[DataRequired()])    
     tile_id = SelectField('Tile', coerce=int, validators=[DataRequired()])     
@@ -148,6 +137,7 @@ class SiteForm(FlaskForm):
     bing_has_quality_issue = BooleanField('Bing has Quality Issue')
     looted = BooleanField('Looted')
     dating = StringField('Dating')        
+    registered = BooleanField('Registered')
     bibliography = StringField('Bibliography') 
     tay_project = StringField('TAY-Project')
     file_bing_image = FileField('Satellite image') 

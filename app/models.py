@@ -94,6 +94,7 @@ class Site(db.Model):
     corona_rate_site = db.Column(db.Boolean, default=False)
     looted = db.Column(db.Boolean, default=False) 
     dating = db.Column(db.String(120))
+    registered = db.Column(db.Boolean, default=False)
     bibliography = db.Column(db.String(5000))
     tay_project = db.Column(db.String(250))    
     filename_bing_image = db.Column(db.String(120))
