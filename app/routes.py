@@ -1,7 +1,7 @@
 from app import app, db
 from app.email import send_password_reset_email
 from app.forms import UserLogin, UserRegistration, UserUpdate, UserResetPasswordRequest, UserResetPassword, PredictionForm, PredictionModelForm, RepositoryCodeForm, RepositoryDataForm, SiteForm, TileForm
-from app.models import User, Tile, Shape, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction
+from app.models import User, Tile, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction
 from flask import render_template, abort, flash, redirect, url_for, request, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 import imghdr
@@ -941,10 +941,6 @@ def site_read(site_id):
 def site_create():
     form = SiteForm()
 
-    shapes = Shape.query.all() 
-    shape_list = [(shape.id, shape.description) for shape in shapes] 
-    form.shape_id.choices = shape_list         
-
     if form.validate_on_submit():
 
         file_bing_transmitted = False        
@@ -979,7 +975,6 @@ def site_create():
         site.longitude = form.longitude.data 
         site.coordinates_confirmed = form.coordinates_confirmed.data
         site.coordinates_outside_research_area = form.coordinates_outside_research_area.data
-        site.shape_id = form.shape_id.data        
         site.looted = form.looted.data
         site.est_tell_diameter = form.est_tell_diameter.data
         site.est_lowertown_diameter = form.est_lowertown_diameter.data
@@ -992,7 +987,6 @@ def site_create():
         site.corona_is_destroyed = form.corona_is_destroyed
         site.corona_has_quality_issue = form.corona_has_quality_issue
         site.corona_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.corona_is_overbuilt == False) and (site.corona_is_destroyed == False) and (site.corona_has_quality_issue == False))
-        site.dating = form.dating.data
         site.registered = form.registered.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
@@ -1020,10 +1014,6 @@ def site_create():
 def site_update(site_id):
     form = SiteForm()
     site = Site.query.get_or_404(site_id)
-
-    shapes = Shape.query.all() 
-    shape_list = [(shape.id, shape.description) for shape in shapes] 
-    form.shape_id.choices = shape_list         
 
     if form.validate_on_submit():
         file_bing_transmitted = False        
@@ -1057,7 +1047,6 @@ def site_update(site_id):
         site.longitude = form.longitude.data 
         site.coordinates_confirmed = form.coordinates_confirmed.data
         site.coordinates_outside_research_area = form.coordinates_outside_research_area.data
-        site.shape_id = form.shape_id.data        
         site.looted = form.looted.data
         site.est_tell_diameter = form.est_tell_diameter.data
         site.est_lowertown_diameter = form.est_lowertown_diameter.data
@@ -1070,7 +1059,6 @@ def site_update(site_id):
         site.corona_is_destroyed = form.corona_is_destroyed
         site.corona_has_quality_issue = form.corona_has_quality_issue
         site.corona_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.corona_is_overbuilt == False) and (site.corona_is_destroyed == False) and (site.corona_has_quality_issue == False))
-        site.dating = form.dating.data
         site.registered = form.registered.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
@@ -1104,7 +1092,6 @@ def site_update(site_id):
         form.longitude.data = site.longitude
         form.coordinates_confirmed.data = site.coordinates_confirmed
         form.coordinates_outside_research_area.data = site.coordinates_outside_research_area
-        form.shape_id.data = site.shape_id
         form.looted.data = site.looted
         form.est_tell_diameter.data = site.est_tell_diameter
         form.est_lowertown_diameter.data = site.est_lowertown_diameter
@@ -1115,7 +1102,6 @@ def site_update(site_id):
         form.corona_is_overbuilt = site.corona_is_overbuilt
         form.corona_is_destroyed = site.corona_is_destroyed 
         form.corona_has_quality_issue = site.corona_has_quality_issue
-        form.dating.data = site.dating
         form.registered.data = site.registered
         form.tay_project.data = site.tay_project
         form.bibliography.data = site.bibliography

@@ -51,22 +51,13 @@ class Tile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     latitude = db.Column(db.Float)
     longitude = db.Column(db.Float)
-    centered = db.Column(db.Boolean) 
+    test_tile = db.Column(db.Boolean) 
     image_filename = db.Column(db.String(120))
     site_id = db.Column(db.Integer, db.ForeignKey('site.id'), nullable=True)     
     predictions = db.relationship('Prediction', backref='tile', lazy='dynamic', cascade="all, delete, delete-orphan")
 
     def __repr__(self):
         return '<Tile {}>'.format(self.id) 
-
-
-class Shape(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(120), index=True)
-    sites = db.relationship('Site', backref='shape', lazy='dynamic')
-
-    def __repr__(self):
-        return '<Shape {}>'.format(self.id) 
 
 
 class Site(db.Model):
@@ -78,7 +69,6 @@ class Site(db.Model):
     district = db.Column(db.String(120), index=True)
     latitude = db.Column(db.Float, default=0)
     longitude = db.Column(db.Float, default=0)    
-    shape_id = db.Column(db.Integer, db.ForeignKey('shape.id'), nullable=True)     
     est_tell_diameter = db.Column(db.String(120), default=0)
     est_lowertown_diameter = db.Column(db.String(120), default=0)
     est_tell_height = db.Column(db.String(120), default=0)
@@ -93,14 +83,14 @@ class Site(db.Model):
     corona_has_quality_issue = db.Column(db.Boolean, default=False)
     corona_rate_site = db.Column(db.Boolean, default=False)
     looted = db.Column(db.Boolean, default=False) 
-    dating = db.Column(db.String(120))
     registered = db.Column(db.Boolean, default=False)
     bibliography = db.Column(db.String(5000))
     tay_project = db.Column(db.String(250))    
     filename_bing_image = db.Column(db.String(120))
     filename_corona_image = db.Column(db.String(120))
     tiles = db.relationship('Tile', backref='site', lazy='dynamic')
-
+    periods = db.relationship('SitePeriod', backref='site', lazy='dynamic')
+    
     def __repr__(self):
         return '<Site {}>'.format(self.id) 
 
@@ -119,6 +109,7 @@ class Period(db.Model):
     code = db.Column(db.String(20), unique=True)
     description = db.Column(db.String(120), unique=True)
     epoch_id = db.Column(db.Integer, db.ForeignKey('epoch.id'))
+    sites = db.relationship('SitePeriod', backref='period', lazy='dynamic')
     
     def __repr__(self):
         return '<Period {}>'.format(self.id)

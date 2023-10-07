@@ -49,10 +49,6 @@
                         <td>{{ "%.4f"|format(site.latitude) }}, {{ "%.4f"|format(site.longitude) }}</td>
                       </tr>
                       <tr>
-                        <td>Shape</td>
-                        <td>{{ site.shape.description }}</td>
-                      </tr>         
-                      <tr>
                         <td>Est. Tell Diameter</td>
                         <td>{{ site.est_tell_diameter }}</td>
                       </tr>
@@ -65,27 +61,35 @@
                         <td>{{ site.est_tell_height }}</td>
                       </tr>   
                       <tr>
-                        <td>Looted</td>
-                        <td>{{ site.looted }}</td>
-                      </tr>     
-                      <tr>
                         <td>Registered</td>
                         <td>{{ site.registered }}</td>
                       </tr>                                     
                       <tr>
-                        <td>Bibliopgraphy</td>
+                        <td style="vertical-align: top;">Bibliopgraphy</td>
                         <td>{{ site.bibliography }}</td>
                       </tr>                       
                       {% if site.tay_project %}
                       <tr>
                         <td>TAY-Project</td>
-                        <td><a href="{{ site.tay_project }}">link</a></td>
+                        <td><a href="{{ site.tay_project }}">Go to</a></td>
                       </tr>     
                       {% endif %} 
                       <tr>
-                        <td>Dating</td>
-                        <td>{{ site.dating }}</td>
-                      </tr>   
+                        <td style="vertical-align: top;">Periods</td>
+                        <td>
+                          {% if site.tay_project %}
+                            <table>
+                              {% for period in site.periods %}
+                              <tr>
+                                <td>{{ period.period.code }}</td>
+                              </tr>
+                              {% endfor %}
+                            </table>                            
+                          {% else %} 
+                            n.a.
+                          {% endif %} 
+                        </td>
+                      </tr>                         
                     </tbody>                    
                   </table>
                 </td>
@@ -142,13 +146,17 @@
 
       <div class="tab-pane fade" id="predictions">
         <div style="margin-top:50px; margin-bottom:50px;">
-          <table>
+          <table bordercolor="white">
             <tbody>
               {% for tile in site.tiles %}
                 {% for prediction in tile.predictions %}
                   {% if prediction.probability >= 50 %}     
                   <tr>
+                    {% if tile.test_tile %}
+                      <td width=260 height=260 bgcolor="#FCFFFF">
+                    {% else %}
                       <td width=260 height=260>
+                    {% endif %}
                         {% if tile.image_filename %}                          
                           {% if prediction.prediction_model.repository_data.corona_data == False %}
                           <a href="{{ url_for('bingmaps_coordinate', latitude=tile.latitude, longitude=tile.longitude) }}">
@@ -159,12 +167,20 @@
                           {% endif %}  
                         {% endif %}
                       </td>
-                      <td width=260 height=260>
+                      {% if tile.test_tile %}
+                      <td width=260 height=260 bgcolor="#FCFFFF">
+                      {% else %}
+                        <td width=260 height=260>
+                      {% endif %}
                         {% if prediction.filename_heatmap %}
                           <img src="{{ url_for('prediction_file_heatmap', prediction_id=prediction.id) }}" style="width: 250px">
                         {% endif %}
                       </td>      
+                      {% if tile.test_tile %}
+                      <td width=* height=260 bgcolor="#FCFFFF">
+                      {% else %}
                       <td width=* height=260>
+                      {% endif %}                      
                         <table>
                           <tbody>
                             <tr>
