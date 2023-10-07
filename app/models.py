@@ -105,6 +105,35 @@ class Site(db.Model):
         return '<Site {}>'.format(self.id) 
 
 
+class Epoch(db.Model):
+    id = db.Column(db.Integer, primary_key=True)    
+    code = db.Column(db.String(20), unique=True)
+    description = db.Column(db.String(120), unique=True)    
+
+    def __repr__(self):
+        return '<Epoch {}>'.format(self.id) 
+
+
+class Period(db.Model):
+    id = db.Column(db.Integer, primary_key=True)    
+    code = db.Column(db.String(20), unique=True)
+    description = db.Column(db.String(120), unique=True)
+    epoch_id = db.Column(db.Integer, db.ForeignKey('epoch.id'))
+    
+    def __repr__(self):
+        return '<Period {}>'.format(self.id)
+    
+
+class SitePeriod(db.Model):
+    id = db.Column(db.Integer, primary_key=True)  
+    site_id = db.Column(db.Integer, db.ForeignKey('site.id'))    
+    period_id = db.Column(db.Integer, db.ForeignKey('period.id'))
+    verified = db.Column(db.Boolean, default = True)
+
+    def __repr__(self):
+        return '<SitePeriod {}>'.format(self.id)     
+
+
 class RepositoryCode(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(120), unique=True)  
