@@ -1,7 +1,7 @@
 from app import app, db
 from app.email import send_password_reset_email
 from app.forms import UserLogin, UserRegistration, UserUpdate, UserResetPasswordRequest, UserResetPassword, PredictionForm, PredictionModelForm, RepositoryCodeForm, RepositoryDataForm, SiteForm, TileForm
-from app.models import User, Tile, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction
+from app.models import User, Tile, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction, CertaintyScore, BingAgricultureScore, BingSettlementScore, CoronaAgricultureScore, CoronaSettlementScore
 from flask import render_template, abort, flash, redirect, url_for, request, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 import imghdr
@@ -941,6 +941,26 @@ def site_read(site_id):
 def site_create():
     form = SiteForm()
 
+    scores = CertaintyScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.certainty_score_id.choices = score_list 
+    
+    scores = CoronaSettlementScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.corona_settlement_score_id.choices = score_list 
+
+    scores = BingSettlementScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.bing_settlement_score_id.choices = score_list 
+
+    scores = CoronaAgricultureScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.corona_agriculture_score_id.choices = score_list 
+
+    scores = BingAgricultureScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.bing_agriculture_score_id.choices = score_list 
+
     if form.validate_on_submit():
 
         file_bing_transmitted = False        
@@ -973,21 +993,18 @@ def site_create():
         site.district = form.district.data
         site.latitude = form.latitude.data 
         site.longitude = form.longitude.data 
-        site.coordinates_confirmed = form.coordinates_confirmed.data
-        site.coordinates_outside_research_area = form.coordinates_outside_research_area.data
-        site.looted = form.looted.data
         site.est_tell_diameter = form.est_tell_diameter.data
         site.est_lowertown_diameter = form.est_lowertown_diameter.data
-        site.est_tell_height = form.est_tell_height.data
-        site.bing_is_overbuilt = form.bing_is_overbuilt
-        site.bing_is_destroyed = form.bing_is_destroyed
-        site.bing_has_quality_issue = form.bing_has_quality_issue        
-        site.bing_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.bing_is_overbuilt == False) and (site.bing_is_destroyed == False) and (site.bing_has_quality_issue == False))
-        site.corona_is_overbuilt = form.corona_is_overbuilt
-        site.corona_is_destroyed = form.corona_is_destroyed
-        site.corona_has_quality_issue = form.corona_has_quality_issue
-        site.corona_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.corona_is_overbuilt == False) and (site.corona_is_destroyed == False) and (site.corona_has_quality_issue == False))
-        site.registered = form.registered.data
+        site.est_tell_height = form.est_tell_height.data        
+        site.is_registered = form.is_registered.data
+        site.is_georeference_confirmed = form.is_georeference_confirmed.data
+        site.is_georeference_outside_research_area = form.is_georeference_outside_research_area.data
+        site.is_looted = form.is_looted.data
+        site.certainty_score_id = form.certainty_score_id.data
+        site.corona_settlement_score_id = form.corona_settlement_score_id.data
+        site.bing_settlement_score_id = form.bing_settlement_score_id.data
+        site.corona_agriculture_score_id = form.corona_agriculture_score_id.data
+        site.bing_agriculture_score_id = form.bing_agriculture_score_id.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
                 
@@ -1014,6 +1031,26 @@ def site_create():
 def site_update(site_id):
     form = SiteForm()
     site = Site.query.get_or_404(site_id)
+
+    scores = CertaintyScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.certainty_score_id.choices = score_list 
+    
+    scores = CoronaSettlementScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.corona_settlement_score_id.choices = score_list 
+
+    scores = BingSettlementScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.bing_settlement_score_id.choices = score_list 
+
+    scores = CoronaAgricultureScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.corona_agriculture_score_id.choices = score_list 
+
+    scores = BingAgricultureScore.query.all() 
+    score_list = [(score.id, score.description) for score in scores] 
+    form.bing_agriculture_score_id.choices = score_list 
 
     if form.validate_on_submit():
         file_bing_transmitted = False        
@@ -1045,21 +1082,18 @@ def site_update(site_id):
         site.district = form.district.data
         site.latitude = form.latitude.data 
         site.longitude = form.longitude.data 
-        site.coordinates_confirmed = form.coordinates_confirmed.data
-        site.coordinates_outside_research_area = form.coordinates_outside_research_area.data
-        site.looted = form.looted.data
         site.est_tell_diameter = form.est_tell_diameter.data
         site.est_lowertown_diameter = form.est_lowertown_diameter.data
-        site.est_tell_height = form.est_tell_height.data
-        site.bing_is_overbuilt = form.bing_is_overbuilt
-        site.bing_is_destroyed = form.bing_is_destroyed
-        site.bing_has_quality_issue = form.bing_has_quality_issue        
-        site.bing_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.bing_is_overbuilt == False) and (site.bing_is_destroyed == False) and (site.bing_has_quality_issue == False))
-        site.corona_is_overbuilt = form.corona_is_overbuilt
-        site.corona_is_destroyed = form.corona_is_destroyed
-        site.corona_has_quality_issue = form.corona_has_quality_issue
-        site.corona_rate_site = ((site.coordinates_confirmed == True) and (site.coordinates_outside_research_area == False) and (site.corona_is_overbuilt == False) and (site.corona_is_destroyed == False) and (site.corona_has_quality_issue == False))
-        site.registered = form.registered.data
+        site.est_tell_height = form.est_tell_height.data        
+        site.is_registered = form.is_registered.data
+        site.is_georeference_confirmed = form.is_georeference_confirmed.data
+        site.is_georeference_outside_research_area = form.is_georeference_outside_research_area.data
+        site.is_looted = form.is_looted.data
+        site.certainty_score_id = form.certainty_score_id.data
+        site.corona_settlement_score_id = form.corona_settlement_score_id.data
+        site.bing_settlement_score_id = form.bing_settlement_score_id.data
+        site.corona_agriculture_score_id = form.corona_agriculture_score_id.data
+        site.bing_agriculture_score_id = form.bing_agriculture_score_id.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
 
@@ -1090,19 +1124,18 @@ def site_update(site_id):
         form.district.data = site.district
         form.latitude.data = site.latitude
         form.longitude.data = site.longitude
-        form.coordinates_confirmed.data = site.coordinates_confirmed
-        form.coordinates_outside_research_area.data = site.coordinates_outside_research_area
-        form.looted.data = site.looted
         form.est_tell_diameter.data = site.est_tell_diameter
         form.est_lowertown_diameter.data = site.est_lowertown_diameter
         form.est_tell_height.data = site.est_tell_height
-        form.bing_is_overbuilt = site.bing_is_overbuilt
-        form.bing_is_destroyed = site.bing_is_destroyed
-        form.bing_has_quality_issue = site.bing_has_quality_issue        
-        form.corona_is_overbuilt = site.corona_is_overbuilt
-        form.corona_is_destroyed = site.corona_is_destroyed 
-        form.corona_has_quality_issue = site.corona_has_quality_issue
-        form.registered.data = site.registered
+        form.is_registered.data = site.is_registered        
+        form.is_georeference_confirmed.data = site.is_georeference_confirmed
+        form.is_georeference_outside_research_area.data = site.is_georeference_outside_research_area
+        form.is_looted.data = site.is_looted
+        form.certainty_score_id.data = site.certainty_score_id
+        form.corona_settlement_score_id.data = site.corona_settlement_score_id
+        form.bing_settlement_score_id.data = site.bing_settlement_score_id
+        form.corona_agriculture_score_id.data = site.corona_agriculture_score_id
+        form.bing_agriculture_score_id.data = site.bing_agriculture_score_id
         form.tay_project.data = site.tay_project
         form.bibliography.data = site.bibliography
         
