@@ -71,49 +71,27 @@ class CertaintyScore(db.Model):
         return '<CertaintyScore {}>'.format(self.id) 
 
 
-class CoronaSettlementScore(db.Model):
+class CoronaConditionScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.Integer, unique=True, index=True)
     description = db.Column(db.String(120))
     is_structure_recognizable = db.Column(db.Boolean, default=False)
-    sites = db.relationship('Site', backref='corona_settlement_score', lazy='dynamic')
+    sites = db.relationship('Site', backref='corona_condition_score', lazy='dynamic')
 
     def __repr__(self):
-        return '<CoronaSettlementScore {}>'.format(self.id)         
+        return '<CoronaConditionScore {}>'.format(self.id)         
 
 
-class BingSettlementScore(db.Model):
+class BingConditionScore(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.Integer, unique=True, index=True)
     description = db.Column(db.String(120))
     is_structure_recognizable = db.Column(db.Boolean, default=False)
-    sites = db.relationship('Site', backref='bing_settlement_score', lazy='dynamic')
+    sites = db.relationship('Site', backref='bing_condition_score', lazy='dynamic')
 
     def __repr__(self):
-        return '<BingSettlementScore {}>'.format(self.id) 
+        return '<BingConditionScore {}>'.format(self.id) 
     
-
-class CoronaAgricultureScore(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.Integer, unique=True, index=True)
-    description = db.Column(db.String(120))
-    is_structure_recognizable = db.Column(db.Boolean, default=False)
-    sites = db.relationship('Site', backref='corona_agriculture_score', lazy='dynamic')
-    
-    def __repr__(self):
-        return '<CoronaAgricultureScore {}>'.format(self.id) 
-
-
-class BingAgricultureScore(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.Integer, unique=True, index=True)
-    description = db.Column(db.String(120))
-    is_structure_recognizable = db.Column(db.Boolean, default=False)
-    sites = db.relationship('Site', backref='bing_agriculture_score', lazy='dynamic')
-    
-    def __repr__(self):
-        return '<BingAgricultureScore {}>'.format(self.id) 
-
 
 class Site(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -132,10 +110,8 @@ class Site(db.Model):
     is_georeference_outside_research_area = db.Column(db.Boolean, default=False)
     is_looted = db.Column(db.Boolean, default=False)
     certainty_score_id = db.Column(db.Integer, db.ForeignKey('certainty_score.id'))
-    corona_settlement_score_id = db.Column(db.Integer, db.ForeignKey('corona_settlement_score.id'))
-    bing_settlement_score_id = db.Column(db.Integer, db.ForeignKey('bing_settlement_score.id'))
-    corona_agriculture_score_id = db.Column(db.Integer, db.ForeignKey('corona_agriculture_score.id'))
-    bing_agriculture_score_id = db.Column(db.Integer, db.ForeignKey('bing_agriculture_score.id'))
+    corona_condition_score_id = db.Column(db.Integer, db.ForeignKey('corona_condition_score.id'))
+    bing_condition_score_id = db.Column(db.Integer, db.ForeignKey('bing_condition_score.id'))
     bibliography = db.Column(db.String(5000))
     tay_project = db.Column(db.String(250))    
     filename_bing_image = db.Column(db.String(120))

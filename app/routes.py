@@ -1,7 +1,7 @@
 from app import app, db
 from app.email import send_password_reset_email
 from app.forms import UserLogin, UserRegistration, UserUpdate, UserResetPasswordRequest, UserResetPassword, PredictionForm, PredictionModelForm, RepositoryCodeForm, RepositoryDataForm, SiteForm, TileForm
-from app.models import User, Tile, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction, CertaintyScore, BingAgricultureScore, BingSettlementScore, CoronaAgricultureScore, CoronaSettlementScore
+from app.models import User, Tile, Site, RepositoryCode, RepositoryData, PredictionModel, Prediction, CertaintyScore, CoronaConditionScore, BingConditionScore
 from flask import render_template, abort, flash, redirect, url_for, request, send_from_directory
 from flask_login import current_user, login_user, logout_user, login_required
 import imghdr
@@ -337,161 +337,7 @@ def prediction_model_list():
 @login_required
 def prediction_model_read(prediction_model_id):
     prediction_model = PredictionModel.query.get_or_404(prediction_model_id)
-   
-    # Ratings
-    if (prediction_model.repository_data.corona_data == True):
-        count_possible_tiles = (Tile.query
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_rate_site == True)
-                                    .count())
-        count_right_positive_tiles = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_rate_site == True)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(50, 100))
-                                    .count())
-        count_false_negative_tiles = (count_possible_tiles - count_right_positive_tiles)
 
-
-        count_right_negative_sites = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_rate_site == False)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(0, 49.99))
-                                    .count())
-        count_right_negative_tiles = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .filter(Tile.site_id == None)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(0, 49.99))
-                                    .count())
-        count_right_negative_tiles = (count_right_negative_sites + count_right_negative_tiles)
-
-
-        count_false_positive_sites = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.corona_rate_site == False)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(50, 100))
-                                    .count())
-        count_false_positive_tiles = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .filter(Tile.site_id == None)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(50, 100))
-                                    .count())
-        count_false_positive_tiles = (count_false_positive_sites + count_false_positive_tiles)
-
-
-    else:
-        count_possible_tiles = (Tile.query
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_rate_site == True)
-                                    .count())
-        count_right_positive_tiles = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_rate_site == True)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(50, 100))
-                                    .count())
-        count_false_negative_tiles = (count_possible_tiles - count_right_positive_tiles)
-
-
-        count_right_negative_sites = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_rate_site == False)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(0, 49.99))
-                                    .count())
-        count_right_negative_tiles = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .filter(Tile.site_id == None)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(0, 49.99))
-                                    .count())
-        count_right_negative_tiles = (count_right_negative_sites + count_right_negative_tiles)
-
-
-        count_false_positive_sites = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .join(Site, Tile.site_id == Site.id)
-                                    .filter(Site.bing_rate_site == False)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(50, 100))
-                                    .count())
-        count_false_positive_tiles = (Prediction.query
-                                    .join(Tile, Prediction.tile_id == Tile.id)
-                                    .filter(Tile.site_id == None)
-                                    .filter(Prediction.prediction_model_id == prediction_model_id)
-                                    .filter(Prediction.probability.between(50, 100))
-                                    .count())
-        count_false_positive_tiles = (count_false_positive_sites + count_false_positive_tiles)
-
-
-    if (count_right_positive_tiles  + count_false_negative_tiles) > 0:
-        tile_sensivity = count_right_positive_tiles / (count_right_positive_tiles + count_false_negative_tiles)
-        tile_false_negative_rate = count_false_negative_tiles / (count_right_positive_tiles + count_false_negative_tiles)
-    else:
-        tile_sensivity = 0
-        tile_false_negative_rate = 0
-
-    if (count_right_negative_tiles + count_false_positive_tiles) > 0:
-        tile_specificity = count_right_negative_tiles / (count_right_negative_tiles + count_false_positive_tiles)
-        tile_false_positive_rate = count_false_positive_tiles / (count_right_negative_tiles + count_false_positive_tiles)
-    else:
-        tile_specificity = 0
-        tile_false_positive_rate = 0
-
-   
-    if (prediction_model.repository_data.corona_data == True):
-        count_all_sites = (Site.query
-                                .filter(Site.corona_rate_site == True)
-                                .count())
-
-        count_right_positive_sites = (db.session.query(Site.id).distinct()
-                                .join(Tile, Site.id == Tile.site_id)
-                                .join(Prediction, Tile.id == Prediction.tile_id)                                
-                                .filter(Site.corona_rate_site == True)
-                                .filter(Prediction.prediction_model_id == prediction_model_id)
-                                .filter(Prediction.probability.between(50, 100))
-                                .group_by(Site.id)
-                                .count())
-    else:
-        count_all_sites = (Site.query
-                                .filter(Site.bing_rate_site == True)
-                                .count())
-
-        count_right_positive_sites = (db.session.query(Site.id).distinct()
-                                .join(Tile, Site.id == Tile.site_id)
-                                .join(Prediction, Tile.id == Prediction.tile_id)                                
-                                .filter(Site.bing_rate_site == True)
-                                .filter(Prediction.prediction_model_id == prediction_model_id)
-                                .filter(Prediction.probability.between(50, 100))
-                                .group_by(Site.id)
-                                .count())
-    count_false_negative_sites = (count_all_sites - count_right_positive_sites)
-
-    if (count_right_positive_sites  + count_false_negative_sites) > 0:
-        site_sensivity = count_right_positive_sites / (count_right_positive_sites + count_false_negative_sites)
-        site_false_negative_rate = count_false_negative_sites / (count_right_positive_sites + count_false_negative_sites)
-    else:
-        site_sensivity = 0
-        site_false_negative_rate = 0
-
-    tile_sensivity = tile_sensivity * 100
-    tile_false_negative_rate = tile_false_negative_rate * 100
-    tile_specificity = tile_specificity * 100
-    tile_false_positive_rate = tile_false_positive_rate * 100
-    site_sensivity = site_sensivity * 100
-    site_false_negative_rate = site_false_negative_rate * 100
-
-
-    # Predictions
     prediction_list = []
     predictions = Prediction.query.filter(Prediction.prediction_model_id==prediction_model_id).all()
     for prediciton in predictions:
@@ -499,7 +345,7 @@ def prediction_model_read(prediction_model_id):
         prediciton_element['probability'] = prediciton.probability
         prediction_list.append(prediciton_element)
 
-    return render_template('prediction_model_form_read.html', title='Model', prediction_model=prediction_model, tile_sensivity=tile_sensivity, tile_false_negative_rate=tile_false_negative_rate, tile_specificity=tile_specificity, tile_false_positive_rate=tile_false_positive_rate, site_sensivity=site_sensivity, site_false_negative_rate=site_false_negative_rate, prediction_list=prediction_list) 
+    return render_template('prediction_model_form_read.html', title='Model', prediction_model=prediction_model, prediction_list=prediction_list)
 
 
 @app.route('/model/create', methods=['GET', 'POST'])
@@ -945,21 +791,13 @@ def site_create():
     score_list = [(score.id, score.description) for score in scores] 
     form.certainty_score_id.choices = score_list 
     
-    scores = CoronaSettlementScore.query.all() 
+    scores = CoronaConditionScore.query.all() 
     score_list = [(score.id, score.description) for score in scores] 
     form.corona_settlement_score_id.choices = score_list 
 
-    scores = BingSettlementScore.query.all() 
+    scores = BingConditionScore.query.all() 
     score_list = [(score.id, score.description) for score in scores] 
     form.bing_settlement_score_id.choices = score_list 
-
-    scores = CoronaAgricultureScore.query.all() 
-    score_list = [(score.id, score.description) for score in scores] 
-    form.corona_agriculture_score_id.choices = score_list 
-
-    scores = BingAgricultureScore.query.all() 
-    score_list = [(score.id, score.description) for score in scores] 
-    form.bing_agriculture_score_id.choices = score_list 
 
     if form.validate_on_submit():
 
@@ -1001,10 +839,8 @@ def site_create():
         site.is_georeference_outside_research_area = form.is_georeference_outside_research_area.data
         site.is_looted = form.is_looted.data
         site.certainty_score_id = form.certainty_score_id.data
-        site.corona_settlement_score_id = form.corona_settlement_score_id.data
-        site.bing_settlement_score_id = form.bing_settlement_score_id.data
-        site.corona_agriculture_score_id = form.corona_agriculture_score_id.data
-        site.bing_agriculture_score_id = form.bing_agriculture_score_id.data
+        site.corona_condition_score_id = form.corona_condition_score_id.data
+        site.bing_condition_score_id = form.bing_condition_score_id.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
                 
@@ -1036,21 +872,13 @@ def site_update(site_id):
     score_list = [(score.id, score.description) for score in scores] 
     form.certainty_score_id.choices = score_list 
     
-    scores = CoronaSettlementScore.query.all() 
+    scores = CoronaConditionScore.query.all() 
     score_list = [(score.id, score.description) for score in scores] 
     form.corona_settlement_score_id.choices = score_list 
 
-    scores = BingSettlementScore.query.all() 
+    scores = BingConditionScore.query.all() 
     score_list = [(score.id, score.description) for score in scores] 
     form.bing_settlement_score_id.choices = score_list 
-
-    scores = CoronaAgricultureScore.query.all() 
-    score_list = [(score.id, score.description) for score in scores] 
-    form.corona_agriculture_score_id.choices = score_list 
-
-    scores = BingAgricultureScore.query.all() 
-    score_list = [(score.id, score.description) for score in scores] 
-    form.bing_agriculture_score_id.choices = score_list 
 
     if form.validate_on_submit():
         file_bing_transmitted = False        
@@ -1090,10 +918,8 @@ def site_update(site_id):
         site.is_georeference_outside_research_area = form.is_georeference_outside_research_area.data
         site.is_looted = form.is_looted.data
         site.certainty_score_id = form.certainty_score_id.data
-        site.corona_settlement_score_id = form.corona_settlement_score_id.data
-        site.bing_settlement_score_id = form.bing_settlement_score_id.data
-        site.corona_agriculture_score_id = form.corona_agriculture_score_id.data
-        site.bing_agriculture_score_id = form.bing_agriculture_score_id.data
+        site.corona_condition_score_id = form.corona_condition_score_id.data
+        site.bing_condition_score_id = form.bing_condition_score_id.data
         site.tay_project = form.tay_project.data
         site.bibliography = form.bibliography.data
 
@@ -1132,10 +958,8 @@ def site_update(site_id):
         form.is_georeference_outside_research_area.data = site.is_georeference_outside_research_area
         form.is_looted.data = site.is_looted
         form.certainty_score_id.data = site.certainty_score_id
-        form.corona_settlement_score_id.data = site.corona_settlement_score_id
-        form.bing_settlement_score_id.data = site.bing_settlement_score_id
-        form.corona_agriculture_score_id.data = site.corona_agriculture_score_id
-        form.bing_agriculture_score_id.data = site.bing_agriculture_score_id
+        form.corona_condition_score_id.data = site.corona_condition_score_id
+        form.bing_condition_score_id.data = site.bing_condition_score_id
         form.tay_project.data = site.tay_project
         form.bibliography.data = site.bibliography
         

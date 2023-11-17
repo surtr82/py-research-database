@@ -20,9 +20,6 @@
       <li class="nav-item">
         <a href="#predictions" class="nav-link" data-toggle="tab">Predictions</a>
       </li>          
-      <li class="nav-item">
-        <a href="#rating" class="nav-link" data-toggle="tab">Rating</a>
-      </li>           
     </ul>
 
     <div class="tab-content">
@@ -134,66 +131,6 @@
       <div class="tab-pane fade" id="predictions">
         <div style="margin-top:50px; margin-bottom:50px;">
           <div id="histogram"></div>
-        </div>
-      </div>
-
-      <div class="tab-pane fade" id="rating">
-        <div style="margin-top:50px; margin-bottom:50px;">
-          <table width=100%>
-            <thead>
-              <tr>
-                <td><b>Measure</b></td>
-                <td><b>Tell</b></td>
-                <td><b>Tile</b></td>
-              </tr>
-            </thead>
-            <tbody>
-                <tr>
-                  <td>          
-                    Sensivity
-                  </td>
-                  <td> 
-                    {{ "%.2f"|format(site_sensivity) }}%
-                  </td>
-                  <td>          
-                    {{ "%.2f"|format(tile_sensivity) }}%
-                  </td>                  
-                </tr>  
-                <tr>
-                  <td>          
-                    False Negative Rate
-                  </td>
-                  <td>          
-                    {{ "%.2f"|format(site_false_negative_rate) }}%
-                  </td>
-                  <td>          
-                    {{ "%.2f"|format(tile_false_negative_rate) }}%
-                  </td>                  
-                </tr>                  
-                <tr>
-                  <td>          
-                    Specificity
-                  </td>
-                  <td>          
-                    -
-                  </td>
-                  <td>          
-                    {{ "%.2f"|format(tile_specificity) }}%
-                  </td>                  
-                </tr>  
-                <tr>
-                  <td>          
-                    False Positive Rate
-                  </td>
-                  <td>          
-                    -
-                  </td>
-                  <td>          
-                    {{ "%.2f"|format(tile_false_positive_rate) }}%
-                  </td>                  
-                </tr>  
-              </tbody>
-          </table>                
         </div>
       </div>
   </div>
